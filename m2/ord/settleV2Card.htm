@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<head>
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+<meta name="viewport" content="user-scalable=yes, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, height=device-height" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title></title>
+
+<script src="/shop/data/skin_mobileV2/default/common/js/common.js"></script>
+<script src="/shop/data/skin_mobileV2/default/common/js/goods_list_action.js"></script>
+<script src="/shop/data/skin_mobileV2/default/common/js/jquery-1.4.2.min.js"></script>
+<script src="/shop/data/skin_mobileV2/default/common/js/jquery.mobile-1.1.1.js"></script>
+<script src="/shop/data/skin_mobileV2/default/common/js/jquery.cookie.js"></script>
+
+<script src="/m/lib/js/mobileAction.js"></script>
+<script src="/m/lib/js/mobileCommon.js"></script>
+<script src="/m/lib/js/mobileDisplay.js"></script>
+<script src="/m/lib/js/mobileAnalysis.js"></script>
+<script type="text/javascript">
+function showSearchArea() {
+
+	if($(".search-area").is(':hidden') == true) {
+		
+		if($(".menu-area").is(':hidden') == false) {
+			$(".menu-area").hide();
+			showCateArea();
+		}
+
+		$(".search-area").slideDown(30);
+	}
+	else {
+		$(".search-area").slideUp(0);
+	}
+}
+
+function showMenuArea() {
+	
+	if($(".menu-area").is(':hidden') == true) {
+		
+		if($(".search-area").is(':hidden') == false) {
+			$(".search-area").slideUp(30);
+		}
+
+		$(".menu-area").slideDown(30);
+		showCateArea();
+	}
+	else {
+		showCateArea();
+		$(".menu-area").hide();
+	}
+}
+
+function showCateArea() {
+	
+	var now_cate = $("[name=now_cate]").val();
+	getCategoryData(now_cate);
+		
+	if($("#cate-area").is(':hidden') == true) {
+		$("#page_title").hide();
+		$(".content").hide();
+		$(".content_goods").hide();
+		$("body").addClass('back_bg');
+		$("#cate-area").slideDown(30);
+	}
+	else {
+		$("#cate-area").hide();
+		$("body").removeClass('back_bg');
+		$("#page_title").show();
+		$(".content").show();
+		
+	}
+}
+
+function goHome() {
+	
+		
+	document.location.href="/" + getMobileHomepath() + "/index.php";
+}
+
+function goMenu(page_nm) {
+	switch(page_nm) {
+		case "my" :
+			document.location.href="/" + getMobileHomepath() + "/myp/menu_list.php";
+			break;
+		case "cart" :
+			document.location.href="/" + getMobileHomepath() + "/goods/cart.php";
+			break;
+		case "wish" :
+			document.location.href="/" + getMobileHomepath() + "/myp/wishlist.php";
+			break;
+		case "login" :
+
+			if(location.pathname.indexOf("/" + getMobileHomepath() + "/mem/login.php") != -1 || location.pathname.indexOf("/" + getMobileHomepath() + "/mem/nomember_order.php") != -1 ) {
+				showMenuArea();
+			}
+			else {
+				document.location.href="/" + getMobileHomepath() + "/mem/login.php";
+			}
+			break;
+		case "logout" :
+				document.location.href="/" + getMobileHomepath() + "/mem/logout.php";
+			break;
+	}
+}
+
+function searchKw() {
+	if($("[name=search_key]").val()) {
+		document.location.href="/" + getMobileHomepath() + "/goods/list.php?kw=" + $("[name=search_key]").val();
+	}
+	else {
+		alert("검색 키워드를 입력해 주시기 바랍니다");
+		return;
+	}
+}
+
+function getMobileHomepath() {
+	//각 URL 최상위 홈PATH를 구한다. 모바일의 홈이 여러 종류일수 있으므로  2012-09-20 khs 
+	var path1 = document.location.pathname; 
+	 
+	if (path1.charAt(0) == '/')	{
+		path1 = path1.substring(1);
+	}
+	var x = path1.split("/");
+	
+	return x[0]; 
+}
+</script>
+<link rel="stylesheet" href="/shop/data/skin_mobileV2/default/common/css/reset.css" />
+<link rel="stylesheet" href="/shop/data/skin_mobileV2/default/common/css/style_.css" />
+<!--<link rel="stylesheet" href="../style_screen.css" type="text/css" media="screen and (min-width: 321px)"  />-->
+
+
+
+</head>
+
+<body>
+
+<div id="dynamic"></div>
+
+<div id="wrap">
+
+<header>
+<div class="gnb">
+	<div id="home-btn" onClick="javascript:goHome();"><img src="/shop/data/skin_mobileV2/default/common/img/gnb/btn_home_object.png" /></div>
+	<div id="menu-btn" onClick="javascript:showMenuArea();"><img src="/shop/data/skin_mobileV2/default/common/img/gnb/btn_menu_object.png" /></div>
+	<div id="search-btn" onClick="javascript:showSearchArea();"><img src="/shop/data/skin_mobileV2/default/common/img/gnb/btn_search_object.png" /></div>
+</div>
+<div class="search-area">
+	<div id="search-box">
+		<input type="text" name="search_key" placeholder="검색어를 입력해 주세요"/>
+	</div>
+	<div id="search-box-btn"><img src="/shop/data/skin_mobileV2/default/common/img/gnb/search_btn_object.png" onclick="javascript:searchKw();" /></div>
+</div>
+<div class="menu-area">
+	<div id="my-btn">
+		<div id="my-btn-effect">
+			<div id="my-btn-object" onClick="javascript:goMenu('my');"></div>
+		</div>
+	</div>
+	<div id="cart-btn">
+		<div id="cart-btn-effect">
+			<div id="cart-btn-object" onClick="javascript:goMenu('cart');"></div>
+		</div>
+	</div>
+	<div id="wish-btn">
+		<div id="wish-btn-effect">
+			<div id="wish-btn-object" onClick="javascript:goMenu('wish');"></div>
+		</div>
+	</div>
+	<div id="info-btn">
+		<div id="info-btn-effect">
+			<div id="info-btn-object" onClick="javascript:goMenu('info');"></div>
+		</div>
+	</div>
+	<div id="logout-btn">
+		<div id="logout-btn-effect">
+			<div id="logout-btn-object" onClick="javascript:goMenu('logout');"></div>
+		</div>
+	</div>
+
+</div>
+</header>
+<section id="cate-area">
+	<div class="top_title">Categories</div>
+	<div class="now_cate">
+		<input type="hidden" name="now_cate" value="" />
+	</div>
+	<div class="cate_path">
+	</div>
+	<div class="cate_list">
+	</div>
+</section>
+<div class="clearb"></div>
+
+<section id="settle">
+
+<form name="frmSettle" method=post action="indb.php" target="ifrmHidden">
+	<input type=hidden name="ordno" value="1349956148457">
+	<input type=hidden name="item_apply_coupon[]" value="">
+	<input type=hidden name="item_apply_coupon[]" value="">
+	<input type=hidden name="nameOrder" value="김하나">
+	<input type=hidden name="phoneOrder[]" value="010">
+	<input type=hidden name="phoneOrder[]" value="3269">
+	<input type=hidden name="phoneOrder[]" value="5876">
+	<input type=hidden name="mobileOrder[]" value="1">
+	<input type=hidden name="mobileOrder[]" value="1">
+	<input type=hidden name="mobileOrder[]" value="1">
+	<input type=hidden name="email" value="test@test.test">
+	<input type=hidden name="nameReceiver" value="김하나">
+	<input type=hidden name="dong" value="">
+	<input type=hidden name="zipcode[]" value="135">
+	<input type=hidden name="zipcode[]" value="864">
+	<input type=hidden name="address" value="서울 강남구 삼성2동">
+	<input type=hidden name="address_sub" value="1111">
+	<input type=hidden name="phoneReceiver[]" value="010">
+	<input type=hidden name="phoneReceiver[]" value="3269">
+	<input type=hidden name="phoneReceiver[]" value="5876">
+	<input type=hidden name="mobileReceiver[]" value="1">
+	<input type=hidden name="mobileReceiver[]" value="1">
+	<input type=hidden name="mobileReceiver[]" value="1">
+	<input type=hidden name="memo" value="">
+	<input type=hidden name="deliPoli" value="0">
+	<input type=hidden name="coupon" value="0">
+	<input type=hidden name="coupon_emoney" value="0">
+	<input type=hidden name="emoney" value="0">
+	<input type=hidden name="emoney_max" value="0">
+	<input type=hidden name="escrow" value="N">
+	<input type=hidden name="settlekind" value="c">
+	<input type=hidden name="settleprice" value="90000">
+
+<!-- 무통장입금 -->
+</form>
+</section>
+
+
+
+<script language="javascript" src="http://xpay.lgdacom.net/xpay/js/xpay_crossplatform.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+/*
+* iframe으로 결제창을 호출하시기를 원하시면 iframe으로 설정 (변수명 수정 불가)
+*/
+	var LGD_window_type = "iframe";
+/*
+* 수정불가
+*/
+function launchCrossPlatform(){
+      lgdwin = open_paymentwindow(document.getElementById('LGD_PAYINFO'), 'service', LGD_window_type);
+}
+/*
+* FORM 명만  수정 가능
+*/
+function getFormObject() {
+        return document.getElementById("LGD_PAYINFO");
+}
+/*
+* 일반용 수정가능(함수명은 수정 불가)
+*/
+function setLGDResult(){
+	if( LGD_window_type == 'iframe' ){
+		document.getElementById('LGD_PAYMENTWINDOW').style.display = "none";
+		document.getElementById('LGD_RESPCODE').value = lgdwin.contentWindow.document.getElementById('LGD_RESPCODE').value;
+		document.getElementById('LGD_RESPMSG').value = lgdwin.contentWindow.document.getElementById('LGD_RESPMSG').value;
+		if(lgdwin.contentWindow.document.getElementById('LGD_PAYKEY') != null){
+			document.getElementById('LGD_PAYKEY').value = lgdwin.contentWindow.document.getElementById('LGD_PAYKEY').value;
+		}
+	}  else {
+		document.getElementById('LGD_RESPCODE').value = lgdwin.document.getElementById('LGD_RESPCODE').value;
+		document.getElementById('LGD_RESPMSG').value = lgdwin.document.getElementById('LGD_RESPMSG').value;
+		if(lgdwin.document.getElementById('LGD_PAYKEY') != null){
+			document.getElementById('LGD_PAYKEY').value = lgdwin.document.getElementById('LGD_PAYKEY').value;
+		}
+	}
+
+	if(document.getElementById('LGD_RESPCODE').value == '0000' ){
+		getFormObject().target = "_self";
+		getFormObject().action = "card_return.php";
+		getFormObject().submit();
+	} else {
+		alert(document.getElementById('LGD_RESPMSG').value);
+	}
+
+}
+/*
+* 스마트폰용 수정가능(함수명은 수정 불가)
+*/
+
+function doSmartXpay(){
+
+        var LGD_RESPCODE        = dpop.getData('LGD_RESPCODE');       //결과코드
+        var LGD_RESPMSG         = dpop.getData('LGD_RESPMSG');        //결과메세지
+
+        if( "0000" == LGD_RESPCODE ) { //인증성공
+            var LGD_PAYKEY      = dpop.getData('LGD_PAYKEY');         //LG텔레콤 인증KEY
+            document.getElementById('LGD_PAYKEY').value = LGD_PAYKEY;
+            getFormObject().submit();
+        } else { //인증실패
+            alert("인증이 실패하였습니다. " + LGD_RESPMSG);
+        }
+
+}
+
+</script>
+<!--  수정 불가(IFRAME 방식시 사용)   -->
+<div id="LGD_PAYMENTWINDOW" style="display:none; width:100%;">
+     <iframe id="LGD_PAYMENTWINDOW_IFRAME" name="LGD_PAYMENTWINDOW_IFRAME" width="100%" height="100%" scrolling="no" frameborder="0">
+     </iframe>
+</div>
+
+<form method="post" id="LGD_PAYINFO" action="card_return.php">
+
+<input type="hidden" name="CST_PLATFORM"                value="service">                   <!-- 테스트, 서비스 구분 -->
+<input type="hidden" name="CST_MID"                     value="go_uplustest">                        <!-- 상점아이디 -->
+<input type="hidden" name="LGD_MID"                     value="go_uplustest">                        <!-- 상점아이디 -->
+<input type="hidden" name="LGD_OID"                     value="1349956148457">                        <!-- 주문번호 -->
+<input type="hidden" name="LGD_BUYER"                   value="김하나">           			<!-- 구매자 -->
+<input type="hidden" name="LGD_PRODUCTINFO"             value="원피스1 외1건">     			<!-- 상품정보 -->
+<input type="hidden" name="LGD_AMOUNT"                  value="90000">                     <!-- 결제금액 -->
+<input type="hidden" name="LGD_BUYEREMAIL"              value="test@test.test">                 <!-- 구매자 이메일 -->
+<input type="hidden" name="LGD_CUSTOM_SKIN"             value="blue">                <!-- 결제창 SKIN -->
+<input type="hidden" name="LGD_CUSTOM_PROCESSTYPE"      value="TWOTR">         <!-- 트랜잭션 처리방식 -->
+<input type="hidden" name="LGD_TIMESTAMP"               value="20121011201012">                  <!-- 타임스탬프 -->
+<input type="hidden" name="LGD_HASHDATA"                value="4a001ccf9ce990bc404ffc7a75fdcef1">                   <!-- MD5 해쉬암호값 -->
+<input type="hidden" name="LGD_VERSION"         		value="PHP_SmartXPay_1.0">				   	    <!-- 버전정보 (삭제하지 마세요) -->
+<input type="hidden" name="LGD_USABLECARD"  			value="">							<!-- 사용가능한 신용카드  -->
+
+<!-- 가상계좌(무통장) 결제연동을 하시는 경우  할당/입금 결과를 통보받기 위해 반드시 LGD_CASNOTEURL 정보를 LG 텔레콤에 전송해야 합니다 . -->
+<!-- input type="hidden" name="LGD_CASNOTEURL"          	value="http://127.0.0.1/shop/order/card/lgdacom/cas_noteurl.php"-->			<!-- 가상계좌 NOTEURL -->
+<input type="hidden" name="LGD_RETURNURL"   			value="http://127.0.0.1/shop/order/card/lgdacom/mobile/cart_return.php">      			<!-- 응답수신페이지-->
+<input type="hidden" name="LGD_CUSTOM_USABLEPAY"   		value="SC0010">			<!-- 사용가능결제수단-->
+
+<!-- 할부개월 선택창 제어를 위한 선택적인 hidden정보 -->
+<input type="hidden" name="LGD_INSTALLRANGE"			value="0">				<!-- 할부개월 범위-->
+<!-- 무이자 할부(수수료 상점부담) 여부를 선택하는 hidden정보 -->
+<input type="hidden" name="LGD_NOINTINF"				value="">					<!-- 신용카드 무이자 할부 적용하기 -->
+
+
+
+<input type="hidden" name="LGD_ESCROW_USEYN"			value="N">					<!-- 에스크로 여부 : 적용(Y),미적용(N)-->
+
+<!-- 수정 불가 ( 인증 후 자동 셋팅 ) -->
+<input type="hidden" name="LGD_RESPCODE" id="LGD_RESPCODE">
+<input type="hidden" name="LGD_RESPMSG" id="LGD_RESPMSG">
+<input type="hidden" name="LGD_PAYKEY"  id="LGD_PAYKEY">
+</form>
+
+<script>
+$('#LGD_PAYMENTWINDOW_IFRAME').resize(function(){
+	if(parseInt($('#LGD_PAYMENTWINDOW_IFRAME').css('width'))>parseInt($('#wrap').css('width'))){
+		$('#wrap').css('width',$('#LGD_PAYMENTWINDOW_IFRAME').css('width'));
+	}
+	setTimeout(scrollTo, 0, 0, 0);
+});
+</script>
+
+<script>
+	$(document).ready(function(){
+		var fm = document.frmSettle; fm.submit();
+	});
+</script>
+
+<script>
+function swapSettleButton(){
+	if (document.getElementById('avoidDblPay')) document.getElementById('avoidDblPay').innerHTML = '<ul>\
+		<li><button type="button" class="submit" onclick="submitSettleForm()"><span class="hidden">결제하기</span></button></li>\
+		<li><button class="cancel" onclick="history.back();"><span class="hidden">취소하기</span></button></li>\
+	</ul>';
+}
+function submitSettleForm()
+{
+	var fm = document.frmSettle;
+
+	if (!chkForm(fm)) return;
+
+	/*** 주문필수정보 체크 ***/
+	if (!fm.nameOrder.value) return;
+	if (!fm.ordno.value) return;
+
+	if (document.getElementById('avoidDblPay')) document.getElementById('avoidDblPay').innerHTML = "--- 현재 결제처리중입니다. 잠시만 기다려주세요. ---<br><a href='javascript:swapSettleButton();'><img src='../../shop/data/skin_mobileV2/default/common/img/btn_cancel.gif'></a>";
+
+	fm.submit();
+}
+</script>
+
+</div>
+<iframe class="hidden" id="ifrmHidden" name="ifrmHidden" src='/shop/blank.txt'></iframe>
+</body>
+</html>
