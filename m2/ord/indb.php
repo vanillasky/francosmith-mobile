@@ -154,7 +154,7 @@ if($coupon_price->arCoupon && $sess['m_no']){
 
 //도로명주소
 if($_POST[road_address]) {
-	$road_address = $_POST[road_address].$_POST[address_sub];
+	$road_address = $_POST[road_address].' '.$_POST[address_sub];
 } else {
 	$road_address = "";
 }
