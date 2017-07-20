@@ -18,7 +18,12 @@
 	$tpl->template_dir	= $shopRootDir."/data/skin_mobile/".$cfgMobileShop['tplSkinMobile'];
 	$tpl->compile_dir	= $shopRootDir."/Template_/_compiles/skin_mobile/".$cfgMobileShop['tplSkinMobile'];
 	$tpl->prefilter		= "adjustPath|include_file|capture_print";
-
+	
+	// PHP 태그 비활성화
+	if ($cfg['skinSecurityMode'] == 'y') {
+		$tpl->disable_php_tag = true;
+	}
+	
 	{ // File Key
 
 	$key_file = preg_replace( "'^.*$mobileRootDir/'si", "", $_SERVER['SCRIPT_NAME'] );
