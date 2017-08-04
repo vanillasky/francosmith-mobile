@@ -29,6 +29,8 @@ window.Swipe = function(element, options) {
   this.element.style.listStyle = 'none';
   this.element.style.margin = 0;
 
+  if (element.id.indexOf('swipe_more') > -1) return;
+
   // trigger slider initialization
   this.setup();
 
@@ -127,6 +129,10 @@ Swipe.prototype = {
 
   prev: function(delay) {
 
+    if (reset_swipe(this.container.id, 'prev', this) === false) {
+    	return;
+    }
+
     // cancel next scheduled automatic transition, if any
     this.delay = delay || 0;
     clearTimeout(this.interval);
@@ -137,6 +143,9 @@ Swipe.prototype = {
   },
 
   next: function(delay) {
+    if (reset_swipe(this.container.id, 'next', this) === false) {
+    	return;
+    }
 
     // cancel next scheduled automatic transition, if any
     this.delay = delay || 0;
