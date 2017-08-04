@@ -99,6 +99,10 @@ if (! $set['emoney']['useduplicate']) {
 ### 주문정보 체크
 chkCartMobile(&$cart, $cfgMobileShop['vtype_goods']);
 
+// 쿠폰 사용 체크
+checkCoupon($cart->item, $_POST['coupon'],$_POST['coupon_emoney'],$_POST['apply_coupon'],$_POST['settlekind']);
+
+
 ### 결제금액 설정
 $discount = $_POST[coupon] + $_POST[emoney] + $cart->dcprice + $_POST['totalUseAmount'.$load_config_ncash['api_id']] + $cart->special_discount_amount;
 $_POST[settleprice] = $cart->totalprice - $discount;
