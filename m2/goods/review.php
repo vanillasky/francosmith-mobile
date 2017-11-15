@@ -2,6 +2,7 @@
 
 include dirname(__FILE__).'/../_header.php';
 @include $shopRootDir.'/lib/page.class.php';
+@include $shopRootDir.'/conf/config.checkout_review.php';
 
 $pg_review = new Page(1,10);
 $pg_review->field = 'a.sno, a.goodsno, a.subject, a.contents, a.point, a.regdt, a.name, b.m_no, b.m_id, a.attach, a.parent, a.notice';

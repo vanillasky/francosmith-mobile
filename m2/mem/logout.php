@@ -2,6 +2,11 @@
 
 @include dirname(__FILE__) . "/../lib/library.php";
 
+if ($_SESSION['social_member_service_user_access_token']) {
+	include dirname(__FILE__).'/../../shop/lib/SocialMember/SocialMemberServiceLoader.php';
+	PaycoMember::serviceOff($_SESSION['social_member_service_user_access_token']);
+}
+
 $_SESSION = array();
 
 session_destroy();

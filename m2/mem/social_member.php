@@ -5,9 +5,19 @@ include $shopRootDir.'/lib/SocialMember/SocialMemberServiceLoader.php';
 
 $_MODE = $_REQUEST['MODE'];
 $_SOCIAL_CODE = $_REQUEST['SOCIAL_CODE'];
+$_CODE = $_REQUEST['code'];
+$_STATE = $_REQUEST['state'];
 
 if (isset($_REQUEST['user_identifier'])) {
 	SocialMemberService::setPersistentData('user_identifier', $_REQUEST['user_identifier']);
+	SocialMemberService::setPersistentData('user_identifier_'.$_SOCIAL_CODE, $_REQUEST['user_identifier']);
+}
+
+if ($_SOCIAL_CODE == 'PAYCO' && isset($_CODE)) {
+	$_PAYCO_DATA = PaycoMember::tokenAvailable($_CODE, $_STATE);
+	SocialMemberService::setPersistentData('user_access_token', $_PAYCO_DATA[0]);
+	SocialMemberService::setPersistentData('user_identifier', $_PAYCO_DATA[1]);
+	SocialMemberService::setPersistentData('user_identifier_'.$_SOCIAL_CODE, $_PAYCO_DATA[1]);
 }
 
 $socialMember = SocialMemberService::getMember($_SOCIAL_CODE);
@@ -23,10 +33,10 @@ switch ($_MODE) {
 			msg('시스템 장애가 발생하였습니다.\r\n고객센터로 문의하여주시기 바랍니다.', '../');
 		}
 		if (isset($_REQUEST['error'])) {
-			msg('페이스북 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', '../');
+			msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', '../');
 		}
 		if (isset($_REQUEST['error_code'])) {
-			msg('페이스북 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', '../');
+			msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', '../');
 		}
 
 		SocialMemberService::updateIdentifierIfChanged($socialMember);
@@ -37,6 +47,53 @@ switch ($_MODE) {
 			echo '<script type="text/javascript">location.replace("./join.php?MODE=social_member_join&SOCIAL_CODE='.$_SOCIAL_CODE.'");</script>';
 		}
 		break;
+		case 'connect':
+			if (!$socialMember || $socialMember->hasError()) {
+				msg('시스템 장애가 발생하였습니다.\r\n고객센터로 문의하여주시기 바랍니다.', 'close');
+			}
+			if (isset($_REQUEST['error'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 연결 할 수 없습니다.', 'close');
+			}
+			if (isset($_REQUEST['error_code'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', 'close');
+			}
+		
+			SocialMemberService::updateIdentifierIfChanged($socialMember);
+			if ($socialMember->isConnected()) {
+				SocialMemberService::expirePersistentData('user_identifier_'.$_SOCIAL_CODE);
+				msg('이미 다른계정에 연결된 '.SocialMemberService::getServiceName($_SOCIAL_CODE).'계정입니다.','./myinfo.php');
+			}
+			else {
+				$socialMember->connect($sess['m_no']);
+				if ($_SOCIAL_CODE == 'PAYCO') $socialMember->login('LINK');
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).'계정이 정상적으로 연결 되었습니다.','./myinfo.php');
+			}
+			break;
+		case 'disconnect':
+			if (!$socialMember || $socialMember->hasError()) {
+				msg('시스템 장애가 발생하였습니다.\r\n고객센터로 문의하여주시기 바랍니다.', 'close');
+			}
+			$result = false;
+			list($password, $connected_sns) = $db->fetch('SELECT password, connected_sns FROM '.GD_MEMBER.' WHERE m_no='.$sess['m_no']);
+			if (strlen($password) < 1 && count(explode(',', $connected_sns)) === 1) {
+				$result = 'ERR_PASSWORD_NOT_EXISTS';
+			}
+			else if ($socialMember) {
+				$disconnectResult = $socialMember->disconnect($sess['m_no']);
+				if ($disconnectResult) {
+					if (SocialMemberService::getPersistentData('social_code') === $_SOCIAL_CODE) SocialMemberService::expirePersistentData('social_code');
+					SocialMemberService::expirePersistentData('user_identifier_'.$_SOCIAL_CODE);
+					$result = 'SUCCESS';
+				}
+				else {
+					$result = 'ERR_SYSTEM_ERROR';
+				}
+			}
+			else {
+				$result = 'ERR_SYSTEM_ERROR';
+			}
+			echo '<script type="text/javascript">window.parent.socialMemberDisconnectCallback("'.$result.'");</script>';
+			break;
 	case 'join':
 
 		include $shopRootDir."/conf/fieldset.php";
@@ -214,6 +271,7 @@ switch ($_MODE) {
 		$ins_arr['private2']  = $_POST['chk_termsThirdPerson'];
 		$ins_arr['private3']  = $_POST['chk_termsEntrust'];
 		if ($under14FieldYn == 'Y') $ins_arr['under14'] = $under14;
+		$ins_arr['sns_member'] = '1';
 		$ins_arr['inflow']    = 'mobileshop';
 
 		$query = "
@@ -361,7 +419,9 @@ switch ($_MODE) {
 					$couponCnt++;
 				}
 			}
-
+		
+			if ($_SOCIAL_CODE == 'PAYCO') $socialMember->login('JOIN');
+			
 			if($joinset['status']=='0') {
 				$_SESSION['tmp_m_no'] = $m_no;
 				msg('관리자 승인후 가입처리됩니다.', 'join.php?mode=endjoin', 'parent');
@@ -378,4 +438,51 @@ switch ($_MODE) {
 			msg('회원 가입중 오류가 발생했습니다. 다시 시도해 주세요', -1);
 		}
 		break;
+		case 'confirm_social_member':
+			if (!$socialMember || $socialMember->hasError()) {
+				msg('시스템 장애가 발생하였습니다.\r\n고객센터로 문의하여주시기 바랍니다.', 'close');
+			}
+			if (isset($_REQUEST['error'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 진행 할 수 없습니다.', 'close');
+			}
+			if (isset($_REQUEST['error_code'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', 'close');
+			}
+		
+			SocialMemberService::updateIdentifierIfChanged($socialMember);
+			if ($socialMember->getLoginStatus() === true && $socialMember->isSameMember()) {
+				$_SESSION['sess'][$_GET['session_status_key']] = 1;
+				echo '<script type="text/javascript">location.replace("./myinfo.php");</script>';
+			}
+			else {
+				unset($_SESSION['sess'][$_GET['session_status_key']]);
+				msg('인증에 실패하였습니다.');
+				if ($_SOCIAL_CODE == 'PAYCO') PaycoMember::serviceOff(SocialMemberService::getPersistentData('user_access_token'));
+				echo '<script type="text/javascript">location.replace("./myinfo.php");</script>';
+			}
+			break;
+		case 'hack':
+			if (!$socialMember || $socialMember->hasError()) {
+				msg('시스템 장애가 발생하였습니다.\r\n고객센터로 문의하여주시기 바랍니다.', 'close');
+			}
+			if (isset($_REQUEST['error'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 진행 할 수 없습니다.', 'close');
+			}
+			if (isset($_REQUEST['error_code'])) {
+				msg(SocialMemberService::getServiceName($_SOCIAL_CODE).' 앱에서 사용자 정보에대한 사용권한을\r\n획득하지 못하여 로그인 할 수 없습니다.', 'close');
+			}
+		
+			SocialMemberService::updateIdentifierIfChanged($socialMember);
+			if ($socialMember->getLoginStatus() === true && $socialMember->isSameMember()) {
+				$_SESSION['sess'][$_GET['session_status_key']] = 1;
+				SocialMemberService::setPersistentData('social_code', $_SOCIAL_CODE);
+				echo '<script type="text/javascript">parent.document.getElementById("act").value = "Y";parent.document.getElementById("hackForm").submit();</script>';
+			}
+			else {
+				unset($_SESSION['sess'][$_GET['session_status_key']]);
+				msg('인증에 실패하였습니다.');
+				if ($_SOCIAL_CODE == 'PAYCO') PaycoMember::serviceOff(SocialMemberService::getPersistentData('user_access_token'));
+				echo '<script type="text/javascript">parent.location.replace("./hack.php");</script>';
+			}
+			break;
 }

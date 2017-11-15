@@ -7,7 +7,7 @@ if(gettype($socialMemberService) == 'object'){
 	if ($socialMemberService->isEnabled() && SocialMemberService::getPersistentData('social_code')) {
 		list($password) = $db->fetch("SELECT password FROM " . GD_MEMBER . " WHERE m_no = '" . $sess['m_no'] . "'");
 		if (strlen($password) < 1) {
-			msg('등록된 비밀번호가 없습니다. \n온라인 PC샵에서 회원정보수정을 통해 비밀번호를 등록할 수 있습니다.', -1);
+			msg('등록된 비밀번호가 없습니다. \n회원정보수정을 통해 비밀번호를 등록할 수 있습니다.', -1);
 		}
 	}
 }
@@ -17,6 +17,19 @@ if (class_exists('validation') && method_exists('validation', 'xssCleanArray')) 
 	    validation::DEFAULT_KEY => 'text',
 	));
 }
+
+//페이코 멤버 확인
+list($connected_sns) = $db->fetch("SELECT connected_sns FROM ".GD_MEMBER." WHERE m_no = '".$sess['m_no']."'");
+if ($socialMemberService->isEnabled() && !SocialMemberService::getPersistentData('social_code')) {
+	if (strpos($connected_sns, 'PAYCO') > -1) {
+		$socialMember = SocialMemberService::getMember('PAYCO');
+		$paycoMember = $socialMemberService->getMember(SocialMemberService::PAYCO);
+
+		$tpl->assign('PaycoSocialMemberHackURL', $paycoMember->getMobileHackURL());
+	}
+}
+
+if (strpos($connected_sns, 'PAYCO') > -1) $tpl->assign('PaycoSocialMemberYn', 'Y');
 
 if( $_POST['act'] == 'Y' && $sess && $_POST['hack_password'] ){
 	if(!$_POST['hack_reason']){
@@ -48,6 +61,12 @@ if( $_POST['act'] == 'Y' && $sess && $_POST['hack_password'] ){
 		echo $Acecounter->scripts;
 	}
 
+	//페이코 개인정보 제공 동의 철회
+	if ($socialMemberService->isEnabled() && SocialMemberService::getPersistentData('social_code') == 'PAYCO') {
+		$socialMember = SocialMemberService::getMember(SocialMemberService::getPersistentData('social_code'));
+		if ($socialMember->isSameMember()) $socialMember->removeServiceOff();
+	}
+	
 	// 탈퇴로그 저장
 	list($dupeinfo) = $db->fetch("SELECT dupeinfo FROM " . GD_MEMBER . " WHERE m_no='" . $sess['m_no'] . "'");
 	if($dupeinfo) $dupeinfoQuery = "dupeinfo	= '$dupeinfo',";

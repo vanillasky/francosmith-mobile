@@ -1,10 +1,17 @@
 <?php
+	
+
 	include dirname(__FILE__) . "/../_header.php";
 	@include $shopRootDir . "/conf/config.pay.php";
 	@include $shopRootDir . "/conf/sns.cfg.php";
 	@include $shopRootDir . "/conf/coupon.php";
 	@include $shopRootDir."/lib/goods_qna.lib.php";
 	@include $shopRootDir . '/lib/Lib_Robot.php';
+	@include $shopRootDir . '/conf/config.checkout_review.php';
+
+	$jQueryUiCssPath =  '../lib/js/jquery.ui.1.8.5/jquery-ui.css';
+	$jQueryUiPath =  '../lib/js/jquery.ui.1.8.5/jquery-ui.js';
+	$jQueryHashtagJsPath = $cfg['rootDir'] . '/proc/hashtag/hashtagControl.js?actTime='.time();
 
 ### 관련 상품 설정 가져오기
 if (is_file($shopRootDir . "/conf/config.related.goods.php")) include $shopRootDir . "/conf/config.related.goods.php";
@@ -204,108 +211,191 @@ try {
 	unset($where);
 	unset($dbCache);
 
+
+	//네이버페이 상품후기 가져오기
+	if ($checkoutReviewCfg['use'] === 'y') {
+	
+		//우선노출설정
+		$priority = "";
+		if ($checkoutReviewCfg['priority'] === '1') $priority = "1";
+	
+		$checkout_where[] = "PR.ProductID  = '$goodsno'";
+			
+		$pg = new Page(1,10);
+		$pg->field = "PR.PurchaseReviewId as sno, PR.PurchaseReviewScore, PR.Title, PR.CreateYmdt, PR.ProductName, PR.ProductID";
+		$db_table = " ".GD_NAVERCHECKOUT_PURCHASEREVIEW." AS PR";
+		$pg->setQuery($db_table,$checkout_where,$sort="PR.CreateYmdt desc");
+		$pg->exec();
+	
+		//DB Cache 사용 141030
+		$dbCache = Core::loader('dbcache')->setLocation('mobile_goodsview_checkout_review');
+	
+		if (!$checkout_loop = $dbCache->getCache($pg->query)) {
+	
+			$res = $db->query($pg->query);
+	
+			while ($review_data=$db->fetch($res)) {
+	
+				if (class_exists('validation') && method_exists('validation', 'xssCleanArray')) {
+					$review_data = validation::xssCleanArray($review_data, array(
+							validation::DEFAULT_KEY => 'text',
+							'Title' => array('html', 'ent_noquotes'),
+					));
+				}
+	
+				$review_data['idx'] = $pg->idx--;
+				$review_data['Title'] = nl2br(htmlspecialchars($review_data[Title]));
+	
+				$query = "select b.goodsnm,b.img_s,c.price
+				from
+					".GD_GOODS." b
+					left join ".GD_GOODS_OPTION." c on b.goodsno=c.goodsno and link and go_is_deleted <> '1' and go_is_display = '1'
+				where
+					b.goodsno = '" . $data[goodsno] . "'";
+				list( $review_data[goodsnm], $review_data[img_s], $review_data[price] ) = $db->fetch($query);
+	
+				//네이버페이 상품후기 평점
+				if ($review_data[PurchaseReviewScore] == "0") {
+					$review_data[PurchaseReviewScore] = "불만족";
+				} else if ($review_data[PurchaseReviewScore] == "1") {
+					$review_data[PurchaseReviewScore] = "보통";
+				} else {
+					$review_data[PurchaseReviewScore] = "만족";
+				}
+	
+				$checkout_loop[] = $review_data;
+			}
+			if ($dbCache) { $dbCache->setCache($pg->query, $checkout_loop); }
+		}
+	
+		$data['checkoutCnt'] = $pg->recode['total'];
+	
+		//글 갯수
+		$reviewTotal = $data['review_cnt'] + $data['checkoutCnt'];
+	
+		unset($pg);
+		unset($where);
+		unset($dbCache);
+	}
+	
 	// 상품 문의 가져오기
 	$pg = new Page(1,10);
 	$pg -> field = "b.m_no, b.m_id,b.name as m_name,a.*";
-
+	
 	$where[] = "a.goodsno = '$goodsno'";
 	$where[] = "a.parent = a.sno";
-
+	
 	$where[]="notice!='1'";
 	$pg->setQuery($db_table=GD_GOODS_QNA." a left join ".GD_MEMBER." b on a.m_no=b.m_no",$where,$sort="parent desc, ( case when parent=a.sno then 0 else 1 end ) asc, regdt desc");
 	$pg->exec();
-
+	
 	//DB Cache 사용 141030
 	$dbCache = Core::loader('dbcache')->setLocation('mobile_goodsview_qna');
-
+	
 	if (!$qna_loop = $dbCache->getCache($pg->query)) {
 		$res = $db->query($pg->query);
 		while ($qna_data=$db->fetch($res)){
 			if (class_exists('validation') && method_exists('validation', 'xssCleanArray')) {
 				$qna_data = validation::xssCleanArray($qna_data, array(
-					validation::DEFAULT_KEY => 'text',
-					'contents' => array('html', 'ent_noquotes'),
+						validation::DEFAULT_KEY => 'text',
+						'contents' => array('html', 'ent_noquotes'),
 				));
 			}
-
+	
 			### 원글 체크
 			list($qna_data['parent_m_no'],$qna_data['secret'],$qna_data['type']) = goods_qna_answer($qna_data['sno'],$qna_data['parent'],$qna_data['secret']);
-
+			$qna_data['contents'] = nl2br(htmlspecialchars($qna_data['contents']));
+	
 			$reply_query = "SELECT subject, contents, regdt, sno, m_no FROM ".GD_GOODS_QNA." WHERE parent='".$qna_data[sno]."' AND sno != parent";
 			$reply_res = $db->_select($reply_query);
-
+	
 			$qna_data['reply'] =$reply_res;
 			$qna_data['reply_cnt'] = count($reply_res);
-
+	
 			### 권한체크
 			if(!$cfg['qnaSecret']) $qna_data['secret'] = 0;
 			list($qna_data['authmodify'],$qna_data['authdelete'],$qna_data['authview']) = goods_qna_chkAuth($qna_data);
-
+	
 			### 댓글 권한 체크
 			if(!empty($qna_data['reply'])){
 				for($i=0; $i<$qna_data['reply_cnt']; $i++){
 					list($qna_data['reply'][$i]['authmodify'],$qna_data['reply'][$i]['authdelete'],$qna_data['reply'][$i]['authview']) = goods_qna_chkAuth($qna_data['reply'][$i]);
 				}
 			}
-
+	
 			### 비밀글 아이콘
 			$qna_data['secretIcon'] = 0;
 			if($qna_data['secret'] == '1') $qna_data['secretIcon'] = 1;
-
+	
 			if($qna_data['name']) {
 				$tmp_name = $qna_data['name'];
 			}
 			else {
 				$tmp_name = $qna_data['m_id'];
 			}
-
+	
 			if(!preg_match('/[0-9A-Za-z]/', substr($tmp_name, 0, 1))) {
 				$division_num = 2;
 			}
 			else {
 				$division_num = 1;
 			}
-
+	
 			$qna_data['qna_name'] = substr($tmp_name, 0, $division_num).implode('', array_fill(0, intval((strlen($tmp_name) -1)/$division_num), '*'));
-
-
+	
+	
 			if ($ici_admin) $qna_data['accessable'] = true;
 			else if ($qna_data['secret'] != '1') $qna_data['accessable'] = true;
 			else if ($qna_data['m_no'] > 0 && $sess['m_no'] == $qna_data['m_no']) $qna_data['accessable'] = true;
 			else $qna_data['accessable'] = false;
-
+	
 			$qna_loop[] = $qna_data;
 		}
 		if ($dbCache) { $dbCache->setCache($pg->query, $qna_loop); }
 	}
-
+	
 	$data['qna_cnt'] = $pg->recode['total'];
-
+	
 	unset($pg);
-
-	if($cfgMobileShop['vtype_goods_view_skin'] == 1 || $cfgMobileShop['vtype_goods_view_skin'] == '') {
-
-		$key_file = preg_replace( "'^.*$mobileRootDir/'si", "", $_SERVER['SCRIPT_NAME'] );
-		$key_file = preg_replace( "'\.php$'si", "2.htm", $key_file );
-
+	
+	//view 스킨 지정
+	$goods_view_skin_setting_version = false;
+	switch((string)$cfgMobileShop['vtype_goods_view_skin']){
+		case '0':
+	
+			break;
+	
+		case '1': default:
+			$goods_view_skin_setting_version = true;
+			$key_file = preg_replace( "'^.*$mobileRootDir/'si", "", $_SERVER['SCRIPT_NAME'] );
+			$key_file = preg_replace( "'\.php$'si", "2.htm", $key_file );
+			break;
+	
+		case '2':
+			$goods_view_skin_setting_version = true;
+			$key_file = preg_replace( "'^.*$mobileRootDir/'si", "", $_SERVER['SCRIPT_NAME'] );
+			$key_file = preg_replace( "'\.php$'si", "3.htm", $key_file );
+			break;
+	}
+	if($goods_view_skin_setting_version === true){
 		if(is_file($tpl->template_dir.'/'.$key_file)) {
 			$tpl->define( array(
-				'tpl'			=> $key_file,
+					'tpl'			=> $key_file,
 			) );
 		}
 	}
-
+	
 	if($_GET['view_area']) {
 		$tpl->assign('view_area', $_GET['view_area']);
 	}
-
+	
 	// 페이지뷰 카운팅
 	if (Lib_Robot::isRobotAccess() === false) {
 		$db->silent(true);
 		$db->query("INSERT INTO ".GD_GOODS_PAGEVIEW." SET date = CURDATE(), goodsno = $goodsno, cnt = 1 ON DUPLICATE KEY UPDATE cnt = cnt + 1");
 		$db->silent();
 	}
-
+	
 	### 템플릿 출력
 	$tpl->assign($data);
 	$tpl->assign('returnUrl', $_SERVER[REQUEST_URI]);
@@ -316,25 +406,39 @@ try {
 	$tpl->assign('qna_loop', $qna_loop);
 	$tpl->assign('coupon_cnt', count($data[a_coupon]));
 	$tpl->assign('customHeader', $customHeader);
-
+	$tpl->assign('checkout_loop', $checkout_loop);
+	$tpl->assign('priority', $priority);
+	$tpl->assign('reviewTotal', $reviewTotal);
+	
+	$jQueryUiUse = false;
+	if($data['hashtag']){
+		$tpl->assign('jQueryHashtagJsPath', $jQueryHashtagJsPath);
+		$jQueryUiUse = true;
+	}
+	
+	$tpl->assign('jQueryUiUse', $jQueryUiUse);
+	if($jQueryUiUse === true){
+		$tpl->assign('jQueryUiPath', $jQueryUiPath);
+		$tpl->assign('jQueryUiCssPath', $jQueryUiCssPath);
+	}
+	
 	### 템플릿 출력
 	Clib_Application::storage()->toGlobal();
-
+	
 	$tpl->assign(array(
-		'clevel'	=> $categoryModel->getLevel(),
-		'slevel'=> Clib_Application::session()->getMemberLevel(),
-		'level_auth'=> $categoryModel->getLevelAuth()
+			'clevel'	=> $categoryModel->getLevel(),
+			'slevel'=> Clib_Application::session()->getMemberLevel(),
+			'level_auth'=> $categoryModel->getLevelAuth()
 	));
 	
-	$goodsBuyable = getGoodsBuyable($goodsno); 
+	$goodsBuyable = getGoodsBuyable($goodsno);
 	$tpl->assign('goodsBuyable', $goodsBuyable);
 	$tpl->print_('tpl');
-
-}
-catch (Clib_Exception $e) {
-	Clib_Application::response()->jsAlert($e)->historyBack();
-}
-
-
+	
+	}
+	catch (Clib_Exception $e) {
+		Clib_Application::response()->jsAlert($e)->historyBack();
+	}
+	
 
 ?>

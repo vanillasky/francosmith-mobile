@@ -10,6 +10,14 @@ if( ($_SESSION['adult']) ){
 	msg("°í°´´ÔÀº ÀÌ¹Ì ¼ºÀÎÀÎÁõ ÇÏ¼Ì½À´Ï´Ù.","../index.php");
 }
 
+if ($socialMemberService->isEnabled()) {
+	$enabledSocialMemberServiceList = $socialMemberService->getEnabledServiceList();
+	if (in_array(SocialMemberService::PAYCO, $enabledSocialMemberServiceList)) {
+		$paycoMember = SocialMemberService::getMember(SocialMemberService::PAYCO);
+		$tpl->assign('PaycoLoginURL', $paycoMember->getMobileLoginURL());
+	}
+}
+
 if (!$_GET['returnUrl']) $returnUrl = 'http://'.$_SERVER['HTTP_HOST'];
 else $returnUrl = $_GET['returnUrl'];
 

@@ -16,16 +16,45 @@ $hpauthRequestData = $hpauth->getAuthRequestData();
 chkMemberMobile();
 
 if(SocialMemberService::getPersistentData('social_code')) {
-	msg('SNS 계정으로 로그인 시 회원정보 수정은 PC에서만 가능합니다.', -1);
+	if (!is_file($tpl->template_dir.'/mem/confirm_social_member.htm')) {
+		msg('SNS 계정으로 로그인 시 회원정보 수정은 PC에서만 가능합니다.', -1);
+	}
 }
 
-if(!$_SESSION['sess']['confirm_password'] && is_file($tpl->template_dir.'/mem/confirm_password.htm')) {
-	$tpl->define(array(
-		'frmMember' => '/mem/confirm_password.htm'
-	));
+if(!$_SESSION['sess']['confirm_password'] && is_file($tpl->template_dir.'/mem/confirm_password.htm') && is_file($tpl->template_dir.'/mem/confirm_social_member.htm')) {
+	if (SocialMemberService::getPersistentData('social_code')) {
+		$tpl->define(array(
+				'frmMember' => '/mem/confirm_social_member.htm'
+		));
+		$socialMember = $socialMemberService->getMember(SocialMemberService::getPersistentData('social_code'));
+		$tpl->assign('SocialCode', SocialMemberService::getPersistentData('social_code'));
+		$tpl->assign('SocialConfirmMemberURL', $socialMember->getMobileConfirmMemberURL('confirm_password'));
+	} else {
+		$tpl->define(array(
+				'frmMember' => '/mem/confirm_password.htm'
+		));
+	}
 } else {
+	if ($socialMemberService->isEnabled()) {
+		$socialMemberServiceList = $socialMemberService->getEnabledServiceList();
+		$socialMember = SocialMemberService::getMember('FACEBOOK');
+		$facebookMember = $socialMemberService->getMember(SocialMemberService::FACEBOOK);
+
+		$tpl->assign('FacebookSocialMemberEnabled', in_array(SocialMemberService::FACEBOOK, $socialMemberServiceList));
+		$tpl->assign('FacebookSocialMemberConnected', $facebookMember->isConnected() && $facebookMember->getMemberNo() == $sess['m_no']);
+		$tpl->assign('FacebookSocialMemberConnectURL', $facebookMember->getMobileConnectURL());
+
+		$socialMember = SocialMemberService::getMember('PAYCO');
+		$paycoMember = $socialMemberService->getMember(SocialMemberService::PAYCO);
+
+		$tpl->assign('PaycoSocialMemberEnabled', in_array(SocialMemberService::PAYCO, $socialMemberServiceList));
+		$tpl->assign('PaycoSocialMemberConnected', $paycoMember->getMemberNo() == $sess['m_no']);
+		$tpl->assign('PaycoSocialMemberConnectURL', $paycoMember->getMobileConnectURL());
+
+		$tpl->assign('memberSocialStatus', true);
+	}
 	$tpl->define(array(
-		'frmMember'	=> '/mem/_form.htm',
+			'frmMember'	=> '/mem/_form.htm',
 	));
 }
 
@@ -37,6 +66,9 @@ if($_SESSION['sess']['endConfirm'] == "y") {
 
 $mode = 'modMember';
 $data = $db->fetch("select MB.*, SC.category from ".GD_MEMBER." AS MB LEFT JOIN ".GD_TODAYSHOP_SUBSCRIBE." AS SC ON MB.m_id = SC.m_id where MB.m_id='$sess[m_id]'");
+
+// SNS 계정 연결정보
+$tpl->assign('SocialCode', $data['connected_sns']);
 
 if (class_exists('validation') && method_exists('validation', 'xssCleanArray')) {
 	$data = validation::xssCleanArray($data, array(

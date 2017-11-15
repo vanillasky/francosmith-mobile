@@ -125,6 +125,11 @@ for($i = 0, $imax = count($cfg_step_keys); $i < $imax; $i++) {
 	$cfg_step[ $cfg_step_keys[$i] ] = $_cfg;
 }
 
+$hashtag = Core::loader('hashtag');
+$hashtagHtml = '';
+$hashtagHtml = $hashtag->getHashtagList('main');
+$tpl->assign('hashtagHtml', $hashtagHtml);
+
 /* 모바일샵 팝업창 관리 시작 */
 $today = date("Y-m-d H:i:s");
 $hour = date("H");

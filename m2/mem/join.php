@@ -67,6 +67,10 @@ if ($socialMemberService->isEnabled()) {
 			$facebookMember = SocialMemberService::getMember(SocialMemberService::FACEBOOK);
 			$tpl->assign('FacebookLoginURL', $facebookMember->getMobileLoginURL('../'));
 		}
+		if (in_array(SocialMemberService::PAYCO, $enabledSocialMemberServiceList)) {
+			$paycoMember = SocialMemberService::getMember(SocialMemberService::PAYCO);
+			$tpl->assign('PaycoLoginURL', $paycoMember->getMobileLoginURL());
+		}
 		$tplfile = 'mem/join_type.htm';
 	}
 	else if ($_MODE === 'social_member_join') {
@@ -88,13 +92,24 @@ if ($socialMemberService->isEnabled()) {
 				msg($email.'\r\n다른 계정에서 사용중인 이메일 입니다.\r\n이미 가입하신 경우 다른 로그인 수단을 통해 로그인 해 주시기 바랍니다.', -1);
 			}
 			else {
+				if ($_SOCIAL_CODE == 'PAYCO') {
+					$_POST['mobile'] = $socialMember->getMobile();
+					$tplfile = 'mem/social_member_join_payco.htm';
+				} else {
+					$tplfile = 'mem/social_member_join.htm';
+				}
 				$tpl->assign('email', $email);
 				$tpl->assign('email_id', $emailID);
-				$tplfile = 'mem/social_member_join.htm';
 			}
 		}
 		else {
-			$tplfile = 'mem/social_member_join.htm';
+			if ($_SOCIAL_CODE == 'PAYCO') {
+				$mobileID = $_POST['mobile'] = $socialMember->getMobile();
+				$tpl->assign('email_id', $mobileID);
+				$tplfile = 'mem/social_member_join_payco.htm';
+			} else {
+				$tplfile = 'mem/social_member_join.htm';
+			}
 		}
 
 		// 생년월일 생일정의
@@ -108,6 +123,7 @@ if ($socialMemberService->isEnabled()) {
 		}
 
 		$tpl->assign('name', $name);
+		$tpl->assign('sex', $socialMember->getSex());
 		$tpl->assign('MODE', $_MODE);
 		$tpl->assign('SOCIAL_CODE', $_SOCIAL_CODE);
 	}

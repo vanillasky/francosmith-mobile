@@ -125,7 +125,7 @@ $mobile_script[] = array('script_file'=>$mobileRootDir.'/lib/js/attendance.js');
 // 커스텀헤더 초기화
 $customHeader = '';
 
-if(strstr($_SERVER[PHP_SELF], 'goods/view')) {
+if(strstr($_SERVER[PHP_SELF], 'goods/view') || strstr($_SERVER[PHP_SELF], 'goods/goods_hashtag_list')) {
 	$mobile_script[] = array('script_file'=>$mobileRootDir.'/lib/js/kakaoLink.js');
 	$mobile_script[] = array('script_file'=>$mobileRootDir.'/lib/js/kakaoStory.js');
 }

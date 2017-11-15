@@ -24,6 +24,11 @@ if (in_array(SocialMemberService::FACEBOOK, $socialMemberServiceList)) {
 	$tpl->assign('csslight','light');
 	$tpl->assign('FacebookLoginURL', $facebookService->getMobileLoginURL($returnUrl));
 }
+if (in_array(SocialMemberService::PAYCO, $socialMemberServiceList)) {
+	$paycoService = SocialMemberService::getMember(SocialMemberService::PAYCO);
+	$tpl->assign('csslight','light');
+	$tpl->assign('PaycoLoginURL', $paycoService->getMobileLoginURL($returnUrl));
+}
 
 $tpl->print_('tpl');
 

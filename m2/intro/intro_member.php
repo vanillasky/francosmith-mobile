@@ -19,6 +19,10 @@ if (in_array(SocialMemberService::FACEBOOK, $socialMemberServiceList)) {
 	$facebookService = SocialMemberService::getMember(SocialMemberService::FACEBOOK);
 	$tpl->assign('FacebookLoginURL', $facebookService->getMobileLoginURL($returnUrl));
 }
+if (in_array(SocialMemberService::PAYCO, $socialMemberServiceList)) {
+	$paycoService = SocialMemberService::getMember(SocialMemberService::PAYCO);
+	$tpl->assign('PaycoLoginURL', $paycoService->getMobileLoginURL($returnUrl));
+}
 
 $tpl->assign($_POST);
 $tpl->assign('realnameyn', (empty($realname[id]) ? 'n' : empty($realname[useyn])? 'n': $realname[useyn] ));

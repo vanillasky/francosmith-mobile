@@ -159,10 +159,10 @@ function makeReviewList(review_data, goodsno) {
 
 			for(var k=0; k<5; k++) {
 				if(k < review_data[i].point) {
-					add_html+= '<span class="active">¡Ú</span>';
+					add_html+= '<span class="active">ï¿½ï¿½</span>';
 				}
 				else {
-					add_html+= '¡Ú';
+					add_html+= 'ï¿½ï¿½';
 				}
 			}
 
@@ -183,7 +183,7 @@ function makeReviewList(review_data, goodsno) {
 			}
 
 			if(review_data[i].authdelete === 'Y') {
-				add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].m_no+'\', '+review_data[i].sno+');"><div class="del-btn">»è Á¦</div></a>';
+				add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].m_no+'\', '+review_data[i].sno+');"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 			}
 
 			for(var j=0; j<review_data[i].reply.length; j++) {
@@ -196,7 +196,7 @@ function makeReviewList(review_data, goodsno) {
 				add_html+= review_data[i].reply[j].contents;
 
 				if(review_data[i].reply[j].authdelete === 'Y') {
-					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].reply[j].m_no+'\', '+review_data[i].reply[j].sno+');"><div class="del-btn">»è Á¦</div></a>';
+					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].reply[j].m_no+'\', '+review_data[i].reply[j].sno+');"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 				}
 
 				add_html+= '			</div>';
@@ -305,10 +305,10 @@ function makeQnaList(review_data, goodsno) {
 
 				add_html+= '	<div class="content-review">';
 				if(review_data[i].m_no > 0) {
-					add_html+= '		ºñ¹Ğ±Û ÀÔ´Ï´Ù.';
+					add_html+= '		ï¿½ï¿½Ğ±ï¿½ ï¿½Ô´Ï´ï¿½.';
 				}
 				else {
-					add_html+= '		ºñ¹Ğ¹øÈ£ : <input type="password" id="goods-qna-password-'+review_data[i].sno+'" name="password" required="required"/><button type="button" data-sno="'+review_data[i].sno+'"  class="goods-qna-certification">È®ÀÎ</button>';
+					add_html+= '		ï¿½ï¿½Ğ¹ï¿½È£ : <input type="password" id="goods-qna-password-'+review_data[i].sno+'" name="password" required="required"/><button type="button" data-sno="'+review_data[i].sno+'"  class="goods-qna-certification">È®ï¿½ï¿½</button>';
 				}
 				add_html+= '</div>';
 
@@ -369,26 +369,26 @@ function makeOrderList(order_data) {
 
 		for(var i=0; i<order_data.length; i++) {
 
-			add_html+= '<div class="sub_title"><div class="point"></div>ÁÖ¹®¹øÈ£ : '+order_data[i].ordno+'<button class="ord_more_btn" onclick="javascript:location.href=\'./orderview.php?ordno='+order_data[i].ordno+'\';">»ó¼¼º¸±â</button></div>';
+			add_html+= '<div class="sub_title"><div class="point"></div>ï¿½Ö¹ï¿½ï¿½ï¿½È£ : '+order_data[i].ordno+'<button class="ord_more_btn" onclick="javascript:location.href=\'./orderview.php?ordno='+order_data[i].ordno+'\';">ï¿½ó¼¼ºï¿½ï¿½ï¿½</button></div>';
 			add_html+= '<table>';
 			add_html+= '<tr>';
-			add_html+= '	<th>»óÇ°¸í</th>';
+			add_html+= '	<th>ï¿½ï¿½Ç°ï¿½ï¿½</th>';
 			add_html+= '	<td class="goods-nm">'+order_data[i].goodsnm+'</td>';
 			add_html+= '</tr>';
 			add_html+= '<tr>';
-			add_html+= '	<th>ÁÖ¹®ÀÏ½Ã</th>';
+			add_html+= '	<th>ï¿½Ö¹ï¿½ï¿½Ï½ï¿½</th>';
 			add_html+= '	<td>'+order_data[i].orddt+'</td>';
 			add_html+= '</tr>';
 			add_html+= '<tr>';
-			add_html+= '	<th>°áÁ¦¹æ¹ı</th>';
+			add_html+= '	<th>ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½</th>';
 			add_html+= '	<td>'+order_data[i].str_settlekind+'</td>';
 			add_html+= '</tr>';
 			add_html+= '<tr>';
-			add_html+= '	<th>ÁÖ¹®±İ¾×</th>';
-			add_html+= '	<td class="goods-price">'+order_data[i].str_settleprice+'¿ø</td>';
+			add_html+= '	<th>ï¿½Ö¹ï¿½ï¿½İ¾ï¿½</th>';
+			add_html+= '	<td class="goods-price">'+order_data[i].str_settleprice+'ï¿½ï¿½</td>';
 			add_html+= '</tr>';
 			add_html+= '<tr>';
-			add_html+= '	<th>ÁÖ¹®»óÅÂ</th>';
+			add_html+= '	<th>ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½</th>';
 			add_html+= '	<td>'+order_data[i].str_step+'</td>';
 			add_html+= '</tr>';
 			add_html+= '</table>';
@@ -446,7 +446,7 @@ function makeLogEmoneyList(log_emoney_data) {
 			add_html+= '	<td class="left first">'+log_emoney_data[i].memo+'</td>';
 
 			if(log_emoney_data[i].emoney > 0) {
-				add_html+= '	<td class="right">'+log_emoney_data[i].emoney+'¿ø</td>';
+				add_html+= '	<td class="right">'+log_emoney_data[i].emoney+'ï¿½ï¿½</td>';
 			}
 			else {
 				add_html+= '	<td class="right"></td>';
@@ -456,7 +456,7 @@ function makeLogEmoneyList(log_emoney_data) {
 				add_html+= '	<td class="right"></td>';
 			}
 			else {
-				add_html+= '	<td class="right">'+log_emoney_data[i].emoney+'¿ø</td>';
+				add_html+= '	<td class="right">'+log_emoney_data[i].emoney+'ï¿½ï¿½</td>';
 			}
 
 			add_html+= '</tr>';
@@ -533,7 +533,7 @@ function makeMemberQnaList(member_qna_data) {
 			add_html+= '		<div class="question-icon"></div>';
 
 			if(member_qna_data[i].ordno >0) {
-				add_html+= ' ÁÖ¹®¹øÈ£ : '+member_qna_data[i].ordno + '<br />';
+				add_html+= ' ï¿½Ö¹ï¿½ï¿½ï¿½È£ : '+member_qna_data[i].ordno + '<br />';
 			}
 
 			add_html+= member_qna_data[i].contents;
@@ -613,10 +613,10 @@ function makeGoodsReviewList(review_data) {
 
 			for(var k=0; k<5; k++) {
 				if(k < review_data[i].point) {
-					add_html+= '<span class="active">¡Ú</span>';
+					add_html+= '<span class="active">ï¿½ï¿½</span>';
 				}
 				else {
-					add_html+= '¡Ú';
+					add_html+= 'ï¿½ï¿½';
 				}
 			}
 
@@ -634,7 +634,7 @@ function makeGoodsReviewList(review_data) {
 			}
 
 			if(review_data[i].authdelete === 'Y') {
-				add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].m_no+ '\', '+review_data[i].sno+' );"><div class="del-btn">»è Á¦</div></a>';
+				add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].m_no+ '\', '+review_data[i].sno+' );"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 			}
 
 			for(var j=0; j<review_data[i].reply.length; j++) {
@@ -646,7 +646,7 @@ function makeGoodsReviewList(review_data) {
 
 				add_html+= review_data[i].reply[j].contents;
 				if(review_data[i].reply[j].authdelete === 'Y') {
-					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].reply[j].m_no+'\', '+review_data[i].reply[j].sno+' );"><div class="del-btn">»è Á¦</div></a>';
+					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_review\', \''+review_data[i].reply[j].m_no+'\', '+review_data[i].reply[j].sno+' );"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 				}
 				add_html+= '			</div>';
 			}
@@ -747,7 +747,7 @@ function makeQnaM2List(qna_data, goodsno) {
 				add_html+= '	<div class="content-qna">';
 				add_html+= '		<div class="question-icon"></div>' + qna_data[i].contents;
 				if(qna_data[i].authdelete === 'Y') {
-					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_qna\', \''+qna_data[i].m_no+'\', '+qna_data[i].sno+' );"><div class="del-btn">»è Á¦</div></a>';
+					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_qna\', \''+qna_data[i].m_no+'\', '+qna_data[i].sno+' );"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 				}
 				add_html+= '	</div>';
 
@@ -760,7 +760,7 @@ function makeQnaM2List(qna_data, goodsno) {
 
 					add_html+= qna_data[i].reply[j].contents;
 					if(qna_data[i].reply[j].authdelete === 'Y') {
-					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_qna\', \''+qna_data[i].reply[j].m_no+'\', '+qna_data[i].reply[j].sno+' );"><div class="del-btn">»è Á¦</div></a>';
+					add_html+= '	<a href="javascript:;" onclick="delete_qnaReview( \'del_qna\', \''+qna_data[i].reply[j].m_no+'\', '+qna_data[i].reply[j].sno+' );"><div class="del-btn">ï¿½ï¿½ ï¿½ï¿½</div></a>';
 					}
 					add_html+= '			</div>';
 				}
@@ -769,10 +769,10 @@ function makeQnaM2List(qna_data, goodsno) {
 
 				add_html+= '	<div class="content-qna">';
 				if(qna_data[i].m_no > 0) {
-					add_html+= '		ºñ¹Ğ±Û ÀÔ´Ï´Ù.';
+					add_html+= '		ï¿½ï¿½Ğ±ï¿½ ï¿½Ô´Ï´ï¿½.';
 				}
 				else {
-					add_html+= '		ºñ¹Ğ¹øÈ£ : <input type="password" id="goods-qna-password-'+qna_data[i].sno+'" name="password" required="required"/><button type="button" data-sno="'+qna_data[i].sno+'"  class="goods-qna-certification">È®ÀÎ</button>';
+					add_html+= '		ï¿½ï¿½Ğ¹ï¿½È£ : <input type="password" id="goods-qna-password-'+qna_data[i].sno+'" name="password" required="required"/><button type="button" data-sno="'+qna_data[i].sno+'"  class="goods-qna-certification">È®ï¿½ï¿½</button>';
 				}
 				add_html+= '</div>';
 
@@ -796,7 +796,7 @@ function makeQnaM2List(qna_data, goodsno) {
 	$(".goods-qna-certification").unbind("click").click(function(event){
 		var $this = $(this), sno = $this.attr("data-sno"), password = $("#goods-qna-password-"+sno).val();
 		if (!password) {
-			alert("ºñ¹Ğ¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.");
+			alert("ï¿½ï¿½Ğ¹ï¿½È£ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ï¿½Ö¼ï¿½ï¿½ï¿½.");
 			return false;
 		}
 		$.ajax({
@@ -807,7 +807,7 @@ function makeQnaM2List(qna_data, goodsno) {
 			"success" : function(responseData)
 			{
 				if (!responseData || !responseData.contents) {
-					alert("ºñ¹Ğ¹øÈ£°¡ ÀÏÄ¡ÇÏÁö ¾Ê½À´Ï´Ù.");
+					alert("ï¿½ï¿½Ğ¹ï¿½È£ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½Ê½ï¿½ï¿½Ï´ï¿½.");
 				}
 				else {
 					var add_html = '';
@@ -987,7 +987,7 @@ function setGoodsImageSoldoutMask() {
 
 		size = {'height':el.clientHeight,'width':el.clientWidth};
 
-		// el ÀÇ ºÎ¸ğ °´Ã¼Áß display = block °´Ã¼°¡ ÀÖ³ª Ã¼Å©
+		// el ï¿½ï¿½ ï¿½Î¸ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ display = block ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½Ö³ï¿½ Ã¼Å©
 		if (size.height == 0) {
 			var p;
 			for (p=el.parentNode; p.style.display != 'none'; p=p.parentNode);
@@ -1031,4 +1031,77 @@ function setGoodsImageSoldoutMask() {
 			a.insertBefore(_mask,img);
 		}
 	}
+}
+
+function getCheckoutReviewData() {
+
+	var data_param = "mode=get_checkout_review";
+	var item_cnt = ($("#review-table .title .non-notice").length) ? $("#review-table .title .non-notice").length : $("#review-table .title").length;
+
+	var goodsno = "";
+	if($("[name=goodsno]").length > 0) {
+		goodsno = $("[name=goodsno]").val();
+	}
+
+	data_param += "&item_cnt=" + item_cnt + "&goodsno="+goodsno;
+
+	try {
+		$.ajax({
+			type: "post",
+			url: "/"+ mobile_root + "/proc/mAjaxAction.php",
+			cache:false,
+			async:false,
+			data: data_param,
+			success: function (res) {
+				if(res != null) {
+					makeCheckoutReviewList(res);
+				}
+				else {
+					$(".more-btn").hide();
+				}
+			},
+			dataType:"json"
+		});
+	}
+	catch(e) {
+		alert(e);
+	}
+}
+
+function makeCheckoutReviewList(review_data) {
+
+	if(review_data.length > 0) {
+		var add_html = "";
+
+		for(var i=0; i<review_data.length; i++) {
+			add_html+= '<tr class="title">';
+			if(review_data[i].idx) {
+				add_html+= '	<td class="first">'+review_data[i].idx+'</td>';
+				add_html+= '	<td class="img">'+review_data[i].img_html+'</td>';
+			} 
+			else {
+				add_html+= '	<td class="first img non-notice" data-goodsno="'+ review_data[i].ProductID + '">'+review_data[i].img_html+'</td>';
+			}
+			add_html+= '	<td class="left">';
+			add_html+= '		<div class="point-star">'+review_data[i].PurchaseReviewScore+'</div>';
+			add_html+= '		<div style="word-break: break-all;">'+review_data[i].Title+'</div>';
+			add_html+= '		<div><img src='+review_data[i].npayImg+'>'+' ë„¤ì´ë²„ í˜ì´ êµ¬ë§¤ì'+' | '+review_data[i].CreateYmdt.split(" ")[0].replace(/\-/g, ".")+'</div>';
+			add_html+= '		</td>';
+			add_html+= '</tr>';
+		}
+	}
+	$("#review-table").append(add_html);
+
+	$("#review-table .title .first.img").unbind("click").click(function(event){
+		var goodsno = this.getAttribute("data-goodsno");
+		if (parseInt(goodsno) > 0) {
+			location.href = "./view.php?goodsno=" + goodsno;
+			event.stopPropagation();
+		}
+	});
+
+	if(review_data.length < 10) {
+		$(".more-btn").hide();
+	}
+
 }

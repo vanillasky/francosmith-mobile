@@ -988,13 +988,29 @@ switch($mode) {
 		$whereArr	= getCategoryLinkQuery('CMGL0.category', $_POST['category']);
 
 		// 카테고리 총 상품개수 for paging
-		$query = " SELECT ";
-		$query.= " COUNT(".$whereArr['distinct']." CMGG0.goodsno) AS __CNT__ ";
-		$query.= " FROM ".GD_GOODS." AS CMGG0 ";
-		$query.= " INNER JOIN ".GD_GOODS_LINK." AS CMGL0 ON CMGG0.goodsno = CMGL0.goodsno ";
-		$query.= " WHERE  (CMGL0.hidden = '0') ";
-		$query.= " and ".$whereArr['where'];
-		$query.= " and (CMGG0.open = '1') ";
+		if($_POST['hashtagPage'] === 'y'){
+			$query = "
+				SELECT
+					COUNT(*) AS __CNT__
+				FROM
+					".GD_GOODS." AS CMGG0
+				INNER JOIN
+					".GD_HASHTAG." AS CMGL0
+				ON
+					CMGG0.goodsno = CMGL0.goodsno  AND CMGL0.hashtag='".iconv('utf-8', 'euc-kr', $_POST['hashtag'])."'
+				WHERE
+					(CMGG0.open = '1')
+			";
+		}
+		else {
+			$query = " SELECT ";
+			$query.= " COUNT(".$whereArr['distinct']." CMGG0.goodsno) AS __CNT__ ";
+			$query.= " FROM ".GD_GOODS." AS CMGG0 ";
+			$query.= " INNER JOIN ".GD_GOODS_LINK." AS CMGL0 ON CMGG0.goodsno = CMGL0.goodsno ";
+			$query.= " WHERE  (CMGL0.hidden = '0') ";
+			$query.= " and ".$whereArr['where'];
+			$query.= " and (CMGG0.open = '1') ";
+		}
 
 		// 품절 상품 제외
 		if ($cfg_soldout['exclude_category']) {
@@ -1099,6 +1115,76 @@ switch($mode) {
 
 		echo $json->encode($result);
 		break;
+	
+		case 'get_checkout_review' :
+		
+			$number = 10;
+			$item_cnt = $_POST['item_cnt'];
+		
+			$review_where = array();
+			if ($_POST['goodsno']) {
+				$review_where[] = "PR.ProductID = '$_POST[goodsno]'";
+			}
+		
+			if(!$item_cnt) {
+				$item_cnt = 0;
+				$page = 1;
+			}
+			else {
+				$page = ceil($item_cnt / $number) + 1;
+			}
+		
+			$pg_review = new Page($page,$number,$item_cnt);
+			$pg_review->field = "PR.PurchaseReviewId as sno, PR.PurchaseReviewScore, PR.Title, PR.CreateYmdt, PR.ProductName, PR.ProductID";
+			$db_table = " ".GD_NAVERCHECKOUT_PURCHASEREVIEW." AS PR";
+		
+			$pg_review->setQuery($db_table,$review_where,$sort="PR.CreateYmdt desc");
+			$pg_review->exec();
+		
+			$res = $db->query($pg_review->query);
+		
+			$review_cnt = 0;
+			while ($review_data=$db->fetch($res)){
+		
+				if (class_exists('validation') && method_exists('validation', 'xssCleanArray')) {
+					$review_data = validation::xssCleanArray($review_data, array(
+							validation::DEFAULT_KEY => 'text',
+							'Title' => array('html', 'ent_noquotes'),
+					));
+				}
+					
+				if($_POST['goodsno']) {
+					$review_data['idx'] = $pg_review->idx--;
+				}
+		
+				$review_data['Title'] = nl2br(htmlspecialchars($review_data[Title]));
+		
+				$query = "select b.goodsnm,b.img_s,c.price
+				from
+					".GD_GOODS." b
+					left join ".GD_GOODS_OPTION." c on b.goodsno=c.goodsno and link and go_is_deleted <> '1' and go_is_display = '1'
+				where
+					b.goodsno = '" . $review_data[ProductID] . "'";
+				list( $review_data[goodsnm], $review_data[img_s], $review_data[price] ) = $db->fetch($query);
+		
+				$review_data['img_html'] = goodsimgMobile($review_data[img_s],100);
+					
+				//네이버페이 상품후기 평점
+				if ($review_data[PurchaseReviewScore] == "0") {
+					$review_data[PurchaseReviewScore] = "불만족";
+				} else if ($review_data[PurchaseReviewScore] == "1") {
+					$review_data[PurchaseReviewScore] = "보통";
+				} else {
+					$review_data[PurchaseReviewScore] = "만족";
+				}
+				$review_data[npayImg] = $GLOBALS[cfg][rootDir]."/data/skin_mobileV2/".$GLOBALS[cfg][tplSkinMobile]."/common/img/goods/npay_img.png";
+				$review_loop[] = $review_data;
+		
+		}
+		
+		echo $json->encode($review_loop);
+		break;
+		
 }
 ?>
 

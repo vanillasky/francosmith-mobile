@@ -1,7 +1,7 @@
 <?
 include dirname(__FILE__) . "/../_header.php";
 @include $shopRootDir . "/lib/page.class.php";
-
+@include $shopRootDir . "/conf/config.checkout_review.php";
 
 if($_GET['goodsno']) {
 	$where[] = "a.goodsno = '$_GET[goodsno]'";
